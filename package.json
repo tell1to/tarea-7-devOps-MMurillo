@@ -6,7 +6,8 @@
     "scripts": {
         "test": "jest",
         "build": "node src/app.js",
-        "package": "npm pack"
+        "package": "npm pack",
+        "verify-package": "node scripts/verify-package.js"
     },
     "devDependencies": {
         "jest": "^29.7.0"

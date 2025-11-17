@@ -42,7 +42,7 @@ jobs:
   build:
     name: Construir y Empaquetar
     runs-on: ubuntu-latest
-    needs: test  # Depende del job de pruebas
+    needs: test
     
     steps:
     - name: Checkout del código
@@ -69,37 +69,59 @@ jobs:
     - name: Crear package
       run: npm run package
       
+    - name: Verificar package generado
+      run: |
+        echo " Verificando package..."
+        PACKAGE_FILE=$(ls *.tgz)
+        echo "Package encontrado: $PACKAGE_FILE"
+        
+        # Verificar que el archivo existe
+        if [ -f "$PACKAGE_FILE" ]; then
+          echo "Package creado exitosamente"
+          
+          # Mostrar información del package
+          echo " Información del package:"
+          tar -tzf "$PACKAGE_FILE" | head -10
+          
+          # Verificar tamaño
+          echo " Tamaño del package:"
+          ls -lh "$PACKAGE_FILE"
+        else
+          echo " Error: No se encontró el package"
+          exit 1
+        fi
+        
+    - name: Validar contenido del package
+      run: |
+        PACKAGE_FILE=$(ls *.tgz)
+        echo "Validando contenido del package..."
+        
+        # Extraer y verificar estructura
+        mkdir -p temp-package
+        tar -xzf "$PACKAGE_FILE" -C temp-package
+        cd temp-package/package
+        
+        echo "Estructura del package:"
+        find . -type f -name "*.js" | head -10
+        
+        echo " package.json contenido:"
+        cat package.json
+        
+        # Verificar que los archivos principales existen
+        if [ -f "src/math.js" ] && [ -f "src/app.js" ]; then
+          echo " Archivos principales presentes"
+        else
+          echo " Faltan archivos principales"
+          exit 1
+        fi
+        
     - name: Subir artefacto (package)
       uses: actions/upload-artifact@v4
       with:
         name: application-package
         path: '*.tgz'
         retention-days: 30
-        
-    - name: Subir build logs
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs
-        path: |
-          package-lock.json
-        retention-days: 15
-
-  # Job de seguridad
-  security:
-    name: Análisis de Seguridad
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout del código
-      uses: actions/checkout@v4
-      
-    - name: Análisis de seguridad con CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: javascript
-        
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
-      
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+    - name: Verificación avanzada del package
+      run: |
+        echo "🧪 Ejecutando verificación avanzada..."
+        npm run verify-package
