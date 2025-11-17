@@ -1,0 +1,21 @@
+{
+    "name": "mi-proyecto-ci-cd",
+    "version": "1.0.0",
+    "description": "Ejemplo práctico de CI/CD con Node.js",
+    "main": "src/app.js",
+    "scripts": {
+        "test": "jest",
+        "build": "node src/app.js",
+        "package": "npm pack"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    },
+    "keywords": [
+        "ci-cd",
+        "github-actions",
+        "nodejs"
+    ],
+    "author": "Tu Nombre",
+    "license": "MIT"
+}
